@@ -1,10 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { Space_Grotesk } from 'next/font/google';
 import { Stage } from '@/components/Stage';
+import { SceneList } from '@/components/editor/SceneList';
+import { PropertyPanel } from '@/components/editor/PropertyPanel';
 import { sampleProject } from '@/data/sampleProject';
 import { chatDemoProject } from '@/data/chatDemoProject';
-import { Project, Viewport } from '@/types/scene';
+import { Project, SceneConfig, Viewport } from '@/types/scene';
+
+const heading = Space_Grotesk({ subsets: ['latin'], weight: ['600', '700'] });
 
 const VIEWPORT_LABELS: Record<Viewport, string> = {
   iphone: 'iPhone (9:16)',
@@ -17,72 +22,151 @@ const DEMO_PROJECTS: Record<string, Project> = {
   chat: chatDemoProject,
 };
 
+// Deep clone so editing doesn't mutate the original demo data objects
+function clone<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function PillButton({
+  active,
+  onClick,
+  children,
+  accent = '#7C5CFF',
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+  accent?: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="rounded-full border-2 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wide transition-all"
+      style={
+        active
+          ? { backgroundColor: accent, borderColor: accent, color: '#fff' }
+          : { backgroundColor: '#fff', borderColor: '#E4E1F0', color: '#6B6B76' }
+      }
+    >
+      {children}
+    </button>
+  );
+}
+
 export default function Home() {
   const [demoKey, setDemoKey] = useState<'perfume' | 'chat'>('chat');
-  const [project, setProject] = useState<Project>(DEMO_PROJECTS['chat']);
+  const [project, setProject] = useState<Project>(clone(DEMO_PROJECTS['chat']));
+  const [selectedId, setSelectedId] = useState<string | null>(project.scenes[0]?.id ?? null);
 
   function switchDemo(key: 'perfume' | 'chat') {
+    const fresh = clone(DEMO_PROJECTS[key]);
     setDemoKey(key);
-    setProject(DEMO_PROJECTS[key]);
+    setProject(fresh);
+    setSelectedId(fresh.scenes[0]?.id ?? null);
   }
 
+  function updateScenes(scenes: SceneConfig[]) {
+    setProject((p) => ({ ...p, scenes }));
+  }
+
+  function handleAdd(scene: SceneConfig) {
+    setProject((p) => ({ ...p, scenes: [...p.scenes, scene] }));
+    setSelectedId(scene.id);
+  }
+
+  function handleDelete(id: string) {
+    setProject((p) => ({ ...p, scenes: p.scenes.filter((s) => s.id !== id) }));
+    setSelectedId((current) => (current === id ? null : current));
+  }
+
+  function handleDuplicate(id: string) {
+    setProject((p) => {
+      const index = p.scenes.findIndex((s) => s.id === id);
+      if (index === -1) return p;
+      const copy = { ...clone(p.scenes[index]), id: `scene-${Date.now()}` };
+      const scenes = [...p.scenes];
+      scenes.splice(index + 1, 0, copy);
+      return { ...p, scenes };
+    });
+  }
+
+  function handleScenePropertyChange(updated: SceneConfig) {
+    setProject((p) => ({
+      ...p,
+      scenes: p.scenes.map((s) => (s.id === updated.id ? updated : s)),
+    }));
+  }
+
+  const selectedScene = project.scenes.find((s) => s.id === selectedId) ?? null;
+
   return (
-    <main className="flex min-h-screen flex-col items-center gap-8 bg-neutral-50 px-6 py-12">
-      <div className="text-center">
-        <h1 className="text-lg font-semibold text-neutral-800">Scene Studio — Proof of Concept</h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          {project.brandName} · drag the seek bar, hit play, resize the viewport
-        </p>
-      </div>
-
-      {/* Demo project switcher */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => switchDemo('perfume')}
-          className={`rounded-full border px-4 py-1.5 text-xs uppercase tracking-wide ${
-            demoKey === 'perfume'
-              ? 'border-neutral-900 bg-neutral-900 text-white'
-              : 'border-neutral-300 text-neutral-600 hover:bg-neutral-100'
-          }`}
-        >
-          Perfume Demo
-        </button>
-        <button
-          onClick={() => switchDemo('chat')}
-          className={`rounded-full border px-4 py-1.5 text-xs uppercase tracking-wide ${
-            demoKey === 'chat'
-              ? 'border-neutral-900 bg-neutral-900 text-white'
-              : 'border-neutral-300 text-neutral-600 hover:bg-neutral-100'
-          }`}
-        >
-          Chat Scene Demo
-        </button>
-      </div>
-
-      {/* Viewport switcher */}
-      <div className="flex gap-2">
-        {(Object.keys(VIEWPORT_LABELS) as Viewport[]).map((vp) => (
-          <button
-            key={vp}
-            onClick={() => setProject((p) => ({ ...p, viewport: vp }))}
-            className={`rounded-full border px-4 py-1.5 text-xs uppercase tracking-wide ${
-              project.viewport === vp
-                ? 'border-neutral-900 bg-neutral-900 text-white'
-                : 'border-neutral-300 text-neutral-600 hover:bg-neutral-100'
-            }`}
+    <main
+      className="flex min-h-screen flex-col items-center gap-6 px-6 py-10 lg:flex-row lg:items-start lg:justify-center"
+      style={{
+        background: 'linear-gradient(160deg, #F6F5FC 0%, #FBF7F3 45%, #F2FAF8 100%)',
+      }}
+    >
+      {/* LEFT: preview */}
+      <div className="flex flex-col items-center gap-4">
+        <div className="flex items-center gap-2.5">
+          <div
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white"
+            style={{ background: 'linear-gradient(135deg, #7C5CFF, #FF6B6B)' }}
           >
-            {VIEWPORT_LABELS[vp]}
-          </button>
-        ))}
+            S
+          </div>
+          <div>
+            <h1 className={`${heading.className} text-lg font-bold text-neutral-800`}>
+              Scene Studio
+            </h1>
+            <p className="text-xs text-neutral-500">{project.brandName}</p>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <PillButton active={demoKey === 'perfume'} onClick={() => switchDemo('perfume')} accent="#D98E3F">
+            Perfume Demo
+          </PillButton>
+          <PillButton active={demoKey === 'chat'} onClick={() => switchDemo('chat')} accent="#3BA7E0">
+            Chat Demo
+          </PillButton>
+        </div>
+
+        <div className="flex gap-2">
+          {(Object.keys(VIEWPORT_LABELS) as Viewport[]).map((vp) => (
+            <PillButton
+              key={vp}
+              active={project.viewport === vp}
+              onClick={() => setProject((p) => ({ ...p, viewport: vp }))}
+              accent="#7C5CFF"
+            >
+              {VIEWPORT_LABELS[vp]}
+            </PillButton>
+          ))}
+        </div>
+
+        <Stage project={project} />
       </div>
 
-      <Stage project={project} />
-
-      <p className="max-w-md text-center text-xs text-neutral-400">
-        Chat scene messages live in <code>src/data/chatDemoProject.ts</code> — edit the
-        messages array, change sender/text, or switch platform to &quot;instagram&quot; and
-        refresh to see it update.
-      </p>
+      {/* RIGHT: editor panels */}
+      <div className="flex w-full max-w-sm flex-col gap-4">
+        <SceneList
+          scenes={project.scenes}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          onReorder={updateScenes}
+          onAdd={handleAdd}
+          onDelete={handleDelete}
+          onDuplicate={handleDuplicate}
+        />
+        {selectedScene ? (
+          <PropertyPanel scene={selectedScene} onChange={handleScenePropertyChange} />
+        ) : (
+          <p className="rounded-2xl border-2 border-dashed border-neutral-200 bg-white/60 p-4 text-center text-xs text-neutral-400">
+            Select a scene above to edit its text, colors, and settings.
+          </p>
+        )}
+      </div>
     </main>
   );
 }

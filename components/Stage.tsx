@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { Project, VIEWPORT_SIZES } from '@/types/scene';
-import { renderScene, animateScene } from './SceneRegistry';
+import { renderScene, animateScene } from './sceneRegistry';
 
 export function Stage({ project }: { project: Project }) {
   const sceneRefs = useRef<(HTMLDivElement | null)[]>([]);
