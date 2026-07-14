@@ -7,6 +7,7 @@ import { SceneList } from '@/components/editor/SceneList';
 import { PropertyPanel } from '@/components/editor/PropertyPanel';
 import { sampleProject } from '@/data/sampleProject';
 import { chatDemoProject } from '@/data/chatDemoProject';
+import { reviewDemoProject } from '@/data/reviewDemoProject';
 import { Project, SceneConfig, Viewport } from '@/types/scene';
 
 const heading = Space_Grotesk({ subsets: ['latin'], weight: ['600', '700'] });
@@ -20,6 +21,7 @@ const VIEWPORT_LABELS: Record<Viewport, string> = {
 const DEMO_PROJECTS: Record<string, Project> = {
   perfume: sampleProject,
   chat: chatDemoProject,
+  review: reviewDemoProject,
 };
 
 // Deep clone so editing doesn't mutate the original demo data objects
@@ -54,11 +56,11 @@ function PillButton({
 }
 
 export default function Home() {
-  const [demoKey, setDemoKey] = useState<'perfume' | 'chat'>('chat');
-  const [project, setProject] = useState<Project>(clone(DEMO_PROJECTS['chat']));
+  const [demoKey, setDemoKey] = useState<'perfume' | 'chat' | 'review'>('review');
+  const [project, setProject] = useState<Project>(clone(DEMO_PROJECTS['review']));
   const [selectedId, setSelectedId] = useState<string | null>(project.scenes[0]?.id ?? null);
 
-  function switchDemo(key: 'perfume' | 'chat') {
+  function switchDemo(key: 'perfume' | 'chat' | 'review') {
     const fresh = clone(DEMO_PROJECTS[key]);
     setDemoKey(key);
     setProject(fresh);
@@ -129,6 +131,9 @@ export default function Home() {
           </PillButton>
           <PillButton active={demoKey === 'chat'} onClick={() => switchDemo('chat')} accent="#3BA7E0">
             Chat Demo
+          </PillButton>
+          <PillButton active={demoKey === 'review'} onClick={() => switchDemo('review')} accent="#1F8A5F">
+            Review Demo
           </PillButton>
         </div>
 

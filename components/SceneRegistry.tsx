@@ -5,6 +5,7 @@ import { VideoIntroScene, animateInVideoIntro } from './scenes/VideoIntroScene';
 import { ProductViewScene, animateInProductView } from './scenes/ProductViewScene';
 import { CTAScene, animateInCTA } from './scenes/CTAScene';
 import { ChatScene, animateInChat } from './scenes/ChatScene';
+import { ReviewStackScene, animateInReviewStack } from './scenes/ReviewStackScene';
 
 // This is the ONE file to touch when you add a brand-new scene type later.
 // 1. Build the component + animateIn function (copy an existing scene file as a starting point)
@@ -23,6 +24,8 @@ export function renderScene(config: SceneConfig) {
       return <CTAScene config={config} />;
     case 'chat':
       return <ChatScene config={config} />;
+    case 'reviewStack':
+      return <ReviewStackScene config={config} />;
   }
 }
 
@@ -43,5 +46,7 @@ export function animateScene(
       return animateInCTA(container, tl, startTime);
     case 'chat':
       return animateInChat(container, tl, startTime, config);
+    case 'reviewStack':
+      return animateInReviewStack(container, tl, startTime, config);
   }
 }

@@ -1,7 +1,8 @@
 'use client';
 
-import { SceneConfig, ChatMessage } from '@/types/scene';
+import { SceneConfig, ChatMessage, Review } from '@/types/scene';
 import { computeChatSceneDuration } from '@/components/scenes/ChatScene';
+import { computeReviewStackDuration } from '@/components/scenes/ReviewStackScene';
 import { SCENE_TYPE_LABELS } from '@/lib/sceneDefaults';
 import { SCENE_COLORS } from '@/lib/sceneColors';
 
@@ -46,176 +47,178 @@ export function PropertyPanel({ scene, onChange }: Props) {
 
       <div className="flex flex-col gap-3 px-4 pb-4" style={ringStyle}>
 
-      {/* Fields shared by every scene type */}
-      <Field label="Duration (seconds)">
-        <input
-          type="number"
-          step={0.1}
-          value={scene.duration}
-          className={inputClass}
-          onChange={(e) => onChange({ ...scene, duration: parseFloat(e.target.value) || 0 })}
-        />
-      </Field>
-      <Field label="Background (hex or CSS gradient)">
-        <input
-          type="text"
-          value={scene.background ?? ''}
-          className={inputClass}
-          onChange={(e) => onChange({ ...scene, background: e.target.value })}
-        />
-      </Field>
+        {/* Fields shared by every scene type */}
+        <Field label="Duration (seconds)">
+          <input
+            type="number"
+            step={0.1}
+            value={scene.duration}
+            className={inputClass}
+            onChange={(e) => onChange({ ...scene, duration: parseFloat(e.target.value) || 0 })}
+          />
+        </Field>
+        <Field label="Background (hex or CSS gradient)">
+          <input
+            type="text"
+            value={scene.background ?? ''}
+            className={inputClass}
+            onChange={(e) => onChange({ ...scene, background: e.target.value })}
+          />
+        </Field>
 
-      {scene.type === 'brandIntro' && (
-        <>
-          <Field label="Brand Name">
-            <input
-              type="text"
-              value={scene.brandName}
-              className={inputClass}
-              onChange={(e) => onChange({ ...scene, brandName: e.target.value })}
-            />
-          </Field>
-          <Field label="Tagline">
-            <input
-              type="text"
-              value={scene.tagline ?? ''}
-              className={inputClass}
-              onChange={(e) => onChange({ ...scene, tagline: e.target.value })}
-            />
-          </Field>
-          <Field label="Text Color">
-            <input
-              type="color"
-              value={scene.textColor ?? '#ffffff'}
-              className={`${inputClass} h-9`}
-              onChange={(e) => onChange({ ...scene, textColor: e.target.value })}
-            />
-          </Field>
-          <Field label="Accent Color">
-            <input
-              type="color"
-              value={scene.accentColor ?? '#C9A24B'}
-              className={`${inputClass} h-9`}
-              onChange={(e) => onChange({ ...scene, accentColor: e.target.value })}
-            />
-          </Field>
-          <Field label="Logo URL (optional)">
-            <input
-              type="text"
-              value={scene.logoUrl ?? ''}
-              placeholder="https://..."
-              className={inputClass}
-              onChange={(e) => onChange({ ...scene, logoUrl: e.target.value })}
-            />
-          </Field>
-        </>
-      )}
+        {scene.type === 'brandIntro' && (
+          <>
+            <Field label="Brand Name">
+              <input
+                type="text"
+                value={scene.brandName}
+                className={inputClass}
+                onChange={(e) => onChange({ ...scene, brandName: e.target.value })}
+              />
+            </Field>
+            <Field label="Tagline">
+              <input
+                type="text"
+                value={scene.tagline ?? ''}
+                className={inputClass}
+                onChange={(e) => onChange({ ...scene, tagline: e.target.value })}
+              />
+            </Field>
+            <Field label="Text Color">
+              <input
+                type="color"
+                value={scene.textColor ?? '#ffffff'}
+                className={`${inputClass} h-9`}
+                onChange={(e) => onChange({ ...scene, textColor: e.target.value })}
+              />
+            </Field>
+            <Field label="Accent Color">
+              <input
+                type="color"
+                value={scene.accentColor ?? '#C9A24B'}
+                className={`${inputClass} h-9`}
+                onChange={(e) => onChange({ ...scene, accentColor: e.target.value })}
+              />
+            </Field>
+            <Field label="Logo URL (optional)">
+              <input
+                type="text"
+                value={scene.logoUrl ?? ''}
+                placeholder="https://..."
+                className={inputClass}
+                onChange={(e) => onChange({ ...scene, logoUrl: e.target.value })}
+              />
+            </Field>
+          </>
+        )}
 
-      {scene.type === 'videoIntro' && (
-        <>
-          <Field label="Headline">
-            <textarea
-              value={scene.headline}
-              className={inputClass}
-              rows={2}
-              onChange={(e) => onChange({ ...scene, headline: e.target.value })}
-            />
-          </Field>
-          <Field label="Subline">
-            <input
-              type="text"
-              value={scene.subline ?? ''}
-              className={inputClass}
-              onChange={(e) => onChange({ ...scene, subline: e.target.value })}
-            />
-          </Field>
-          <Field label="Text Color">
-            <input
-              type="color"
-              value={scene.textColor ?? '#ffffff'}
-              className={`${inputClass} h-9`}
-              onChange={(e) => onChange({ ...scene, textColor: e.target.value })}
-            />
-          </Field>
-        </>
-      )}
+        {scene.type === 'videoIntro' && (
+          <>
+            <Field label="Headline">
+              <textarea
+                value={scene.headline}
+                className={inputClass}
+                rows={2}
+                onChange={(e) => onChange({ ...scene, headline: e.target.value })}
+              />
+            </Field>
+            <Field label="Subline">
+              <input
+                type="text"
+                value={scene.subline ?? ''}
+                className={inputClass}
+                onChange={(e) => onChange({ ...scene, subline: e.target.value })}
+              />
+            </Field>
+            <Field label="Text Color">
+              <input
+                type="color"
+                value={scene.textColor ?? '#ffffff'}
+                className={`${inputClass} h-9`}
+                onChange={(e) => onChange({ ...scene, textColor: e.target.value })}
+              />
+            </Field>
+          </>
+        )}
 
-      {scene.type === 'productView' && (
-        <>
-          <Field label="Product Name">
-            <input
-              type="text"
-              value={scene.productName}
-              className={inputClass}
-              onChange={(e) => onChange({ ...scene, productName: e.target.value })}
-            />
-          </Field>
-          <Field label="Caption">
-            <input
-              type="text"
-              value={scene.caption ?? ''}
-              className={inputClass}
-              onChange={(e) => onChange({ ...scene, caption: e.target.value })}
-            />
-          </Field>
-          <Field label="Image URL">
-            <input
-              type="text"
-              value={scene.imageUrl ?? ''}
-              placeholder="https://..."
-              className={inputClass}
-              onChange={(e) => onChange({ ...scene, imageUrl: e.target.value })}
-            />
-          </Field>
-          <Field label="Accent Color">
-            <input
-              type="color"
-              value={scene.accentColor ?? '#C9A24B'}
-              className={`${inputClass} h-9`}
-              onChange={(e) => onChange({ ...scene, accentColor: e.target.value })}
-            />
-          </Field>
-        </>
-      )}
+        {scene.type === 'productView' && (
+          <>
+            <Field label="Product Name">
+              <input
+                type="text"
+                value={scene.productName}
+                className={inputClass}
+                onChange={(e) => onChange({ ...scene, productName: e.target.value })}
+              />
+            </Field>
+            <Field label="Caption">
+              <input
+                type="text"
+                value={scene.caption ?? ''}
+                className={inputClass}
+                onChange={(e) => onChange({ ...scene, caption: e.target.value })}
+              />
+            </Field>
+            <Field label="Image URL">
+              <input
+                type="text"
+                value={scene.imageUrl ?? ''}
+                placeholder="https://..."
+                className={inputClass}
+                onChange={(e) => onChange({ ...scene, imageUrl: e.target.value })}
+              />
+            </Field>
+            <Field label="Accent Color">
+              <input
+                type="color"
+                value={scene.accentColor ?? '#C9A24B'}
+                className={`${inputClass} h-9`}
+                onChange={(e) => onChange({ ...scene, accentColor: e.target.value })}
+              />
+            </Field>
+          </>
+        )}
 
-      {scene.type === 'cta' && (
-        <>
-          <Field label="Headline">
-            <input
-              type="text"
-              value={scene.headline}
-              className={inputClass}
-              onChange={(e) => onChange({ ...scene, headline: e.target.value })}
-            />
-          </Field>
-          <Field label="Subline">
-            <input
-              type="text"
-              value={scene.subline ?? ''}
-              className={inputClass}
-              onChange={(e) => onChange({ ...scene, subline: e.target.value })}
-            />
-          </Field>
-          <Field label="Button Text">
-            <input
-              type="text"
-              value={scene.buttonText ?? ''}
-              className={inputClass}
-              onChange={(e) => onChange({ ...scene, buttonText: e.target.value })}
-            />
-          </Field>
-          <Field label="Accent Color">
-            <input
-              type="color"
-              value={scene.accentColor ?? '#C9A24B'}
-              className={`${inputClass} h-9`}
-              onChange={(e) => onChange({ ...scene, accentColor: e.target.value })}
-            />
-          </Field>
-        </>
-      )}
+        {scene.type === 'cta' && (
+          <>
+            <Field label="Headline">
+              <input
+                type="text"
+                value={scene.headline}
+                className={inputClass}
+                onChange={(e) => onChange({ ...scene, headline: e.target.value })}
+              />
+            </Field>
+            <Field label="Subline">
+              <input
+                type="text"
+                value={scene.subline ?? ''}
+                className={inputClass}
+                onChange={(e) => onChange({ ...scene, subline: e.target.value })}
+              />
+            </Field>
+            <Field label="Button Text">
+              <input
+                type="text"
+                value={scene.buttonText ?? ''}
+                className={inputClass}
+                onChange={(e) => onChange({ ...scene, buttonText: e.target.value })}
+              />
+            </Field>
+            <Field label="Accent Color">
+              <input
+                type="color"
+                value={scene.accentColor ?? '#C9A24B'}
+                className={`${inputClass} h-9`}
+                onChange={(e) => onChange({ ...scene, accentColor: e.target.value })}
+              />
+            </Field>
+          </>
+        )}
 
-      {scene.type === 'chat' && <ChatMessageEditor scene={scene} onChange={onChange} />}
+        {scene.type === 'chat' && <ChatMessageEditor scene={scene} onChange={onChange} />}
+
+        {scene.type === 'reviewStack' && <ReviewListEditor scene={scene} onChange={onChange} />}
       </div>
     </div>
   );
@@ -296,6 +299,87 @@ function ChatMessageEditor({
       </button>
       <p className="mt-1 text-[10px] text-neutral-400">
         Duration auto-recalculates based on message count whenever you add or remove one.
+      </p>
+    </div>
+  );
+}
+
+function ReviewListEditor({
+  scene,
+  onChange,
+}: {
+  scene: Extract<SceneConfig, { type: 'reviewStack' }>;
+  onChange: (s: SceneConfig) => void;
+}) {
+  function updateReview(i: number, patch: Partial<Review>) {
+    const reviews = scene.reviews.map((r, idx) => (idx === i ? { ...r, ...patch } : r));
+    onChange({ ...scene, reviews });
+  }
+
+  function addReview() {
+    const reviews = [...scene.reviews, { stars: 5, quote: 'New review text', name: 'Customer' }];
+    onChange({ ...scene, reviews, duration: computeReviewStackDuration(reviews.length) });
+  }
+
+  function removeReview(i: number) {
+    const reviews = scene.reviews.filter((_, idx) => idx !== i);
+    onChange({ ...scene, reviews, duration: computeReviewStackDuration(reviews.length) });
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Field label="Label (shown above the stack)">
+        <input
+          type="text"
+          value={scene.label ?? ''}
+          className={inputClass}
+          onChange={(e) => onChange({ ...scene, label: e.target.value })}
+        />
+      </Field>
+
+      <span className="mt-2 text-xs font-medium text-neutral-600">Reviews</span>
+      {scene.reviews.map((r, i) => (
+        <div key={i} className="flex flex-col gap-1 rounded-md border border-neutral-200 p-2">
+          <div className="flex items-center gap-2">
+            <select
+              value={r.stars}
+              className={`${inputClass} w-16`}
+              onChange={(e) => updateReview(i, { stars: parseInt(e.target.value, 10) })}
+            >
+              {[5, 4, 3, 2, 1].map((n) => (
+                <option key={n} value={n}>
+                  {n}★
+                </option>
+              ))}
+            </select>
+            <input
+              type="text"
+              value={r.name}
+              placeholder="Customer name"
+              className={`${inputClass} flex-1`}
+              onChange={(e) => updateReview(i, { name: e.target.value })}
+            />
+            <button onClick={() => removeReview(i)} className="text-xs text-red-500">
+              ✕
+            </button>
+          </div>
+          <textarea
+            value={r.quote}
+            placeholder="Review text"
+            className={inputClass}
+            rows={2}
+            onChange={(e) => updateReview(i, { quote: e.target.value })}
+          />
+        </div>
+      ))}
+      <button
+        onClick={addReview}
+        className="mt-1 rounded-md border border-dashed border-neutral-300 px-2 py-1 text-xs text-neutral-500 hover:bg-neutral-50"
+      >
+        + Add review
+      </button>
+      <p className="mt-1 text-[10px] text-neutral-400">
+        Duration auto-recalculates based on review count whenever you add or remove one.
       </p>
     </div>
   );

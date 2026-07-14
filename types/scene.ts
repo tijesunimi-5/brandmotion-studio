@@ -9,7 +9,8 @@ export type SceneType =
   | "videoIntro"
   | "productView"
   | "cta"
-  | "chat";
+  | "chat"
+  | "reviewStack";
 
 export interface BaseSceneConfig {
   id: string; // unique id, e.g. "scene-1"
@@ -62,13 +63,28 @@ export interface ChatSceneConfig extends BaseSceneConfig {
   contactName?: string;
 }
 
+export interface Review {
+  stars: number; // 1-5
+  quote: string;
+  name: string;
+}
+
+export interface ReviewStackConfig extends BaseSceneConfig {
+  type: "reviewStack";
+  reviews: Review[];
+  label?: string; // e.g. "Real Customers, Real Words"
+  starColor?: string;
+  accentDeep?: string; // color for the label text
+}
+
 // The union type — every scene in a project is one of these
 export type SceneConfig =
   | BrandIntroConfig
   | VideoIntroConfig
   | ProductViewConfig
   | CTAConfig
-  | ChatSceneConfig;
+  | ChatSceneConfig
+  | ReviewStackConfig;
 
 export type Viewport = "iphone" | "square" | "landscape";
 
