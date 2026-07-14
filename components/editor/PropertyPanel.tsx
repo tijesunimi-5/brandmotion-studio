@@ -11,61 +11,74 @@ interface Props {
   onChange: (updated: SceneConfig) => void;
 }
 
+// Attractive Dark UI Input Styling
 const inputClass =
-  'rounded-lg border border-neutral-300 px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 transition-shadow';
+  'rounded-lg border border-neutral-800 bg-neutral-900/50 px-3 py-2 text-sm text-neutral-200 placeholder-neutral-600 focus:border-transparent focus:outline-none focus:ring-2 transition-all duration-200';
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="flex flex-col gap-1 text-xs text-neutral-600">
-      <span className="font-semibold">{label}</span>
+    <label className="flex flex-col gap-1.5 text-xs text-neutral-400">
+      <span className="font-semibold tracking-wide text-neutral-300">{label}</span>
       {children}
     </label>
   );
 }
 
 export function PropertyPanel({ scene, onChange }: Props) {
-  const color = SCENE_COLORS[scene.type];
+  // Safely fallback if a scene type isn't defined yet
+  const color = SCENE_COLORS[scene.type] || { accent: '#a855f7', soft: 'rgba(168, 85, 247, 0.1)', text: '#ffffff' };
   const ringStyle = { '--tw-ring-color': color.accent } as React.CSSProperties;
 
   return (
     <div
-      className="flex flex-col gap-3 overflow-hidden rounded-2xl border bg-white shadow-sm"
-      style={{ borderColor: color.accent }}
+      className="flex flex-col gap-4 overflow-hidden rounded-2xl border bg-neutral-950 shadow-2xl backdrop-blur-md"
+      style={{ borderColor: `${color.accent}33` }} // Subtle colored border transparency
     >
+      {/* Panel Header */}
       <div
-        className="flex items-center gap-2 px-4 py-3"
+        className="flex items-center gap-3 px-5 py-4 border-b border-neutral-900"
         style={{ backgroundColor: color.soft }}
       >
         <span
-          className="h-2.5 w-2.5 rounded-full"
-          style={{ backgroundColor: color.accent }}
+          className="h-2.5 w-2.5 rounded-full animate-pulse"
+          style={{
+            backgroundColor: color.accent,
+            boxShadow: `0 0 10px ${color.accent}`
+          }}
         />
-        <span className="text-xs font-bold uppercase tracking-wider" style={{ color: color.text }}>
+        <span className="text-xs font-bold uppercase tracking-widest text-neutral-200">
           Editing: {SCENE_TYPE_LABELS[scene.type]}
         </span>
       </div>
 
-      <div className="flex flex-col gap-3 px-4 pb-4" style={ringStyle}>
+      {/* Editor Body */}
+      <div className="flex flex-col gap-4 px-5 pb-5 max-h-[75vh] overflow-y-auto" style={ringStyle}>
 
-        {/* Fields shared by every scene type */}
-        <Field label="Duration (seconds)">
-          <input
-            type="number"
-            step={0.1}
-            value={scene.duration}
-            className={inputClass}
-            onChange={(e) => onChange({ ...scene, duration: parseFloat(e.target.value) || 0 })}
-          />
-        </Field>
-        <Field label="Background (hex or CSS gradient)">
-          <input
-            type="text"
-            value={scene.background ?? ''}
-            className={inputClass}
-            onChange={(e) => onChange({ ...scene, background: e.target.value })}
-          />
-        </Field>
+        {/* Global properties shared by all scenes */}
+        <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-neutral-900/30 border border-neutral-900">
+          <Field label="Duration (s)">
+            <input
+              type="number"
+              step={0.1}
+              value={scene.duration}
+              className={inputClass}
+              onChange={(e) => onChange({ ...scene, duration: parseFloat(e.target.value) || 0 })}
+            />
+          </Field>
+          <Field label="Background Canvas">
+            <input
+              type="text"
+              value={scene.background ?? ''}
+              className={inputClass}
+              placeholder="#000000"
+              onChange={(e) => onChange({ ...scene, background: e.target.value })}
+            />
+          </Field>
+        </div>
 
+        <hr className="border-neutral-900" />
+
+        {/* Dynamic Fields Based on Scene Types */}
         {scene.type === 'brandIntro' && (
           <>
             <Field label="Brand Name">
@@ -84,22 +97,40 @@ export function PropertyPanel({ scene, onChange }: Props) {
                 onChange={(e) => onChange({ ...scene, tagline: e.target.value })}
               />
             </Field>
-            <Field label="Text Color">
-              <input
-                type="color"
-                value={scene.textColor ?? '#ffffff'}
-                className={`${inputClass} h-9`}
-                onChange={(e) => onChange({ ...scene, textColor: e.target.value })}
-              />
-            </Field>
-            <Field label="Accent Color">
-              <input
-                type="color"
-                value={scene.accentColor ?? '#C9A24B'}
-                className={`${inputClass} h-9`}
-                onChange={(e) => onChange({ ...scene, accentColor: e.target.value })}
-              />
-            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Text Color">
+                <div className="relative flex items-center">
+                  <input
+                    type="color"
+                    value={scene.textColor ?? '#ffffff'}
+                    className="absolute left-2 w-6 h-6 rounded-md bg-transparent border-none cursor-pointer"
+                    onChange={(e) => onChange({ ...scene, textColor: e.target.value })}
+                  />
+                  <input
+                    type="text"
+                    value={scene.textColor ?? '#ffffff'}
+                    className={`${inputClass} w-full pl-10`}
+                    onChange={(e) => onChange({ ...scene, textColor: e.target.value })}
+                  />
+                </div>
+              </Field>
+              <Field label="Accent Color">
+                <div className="relative flex items-center">
+                  <input
+                    type="color"
+                    value={scene.accentColor ?? '#C9A24B'}
+                    className="absolute left-2 w-6 h-6 rounded-md bg-transparent border-none cursor-pointer"
+                    onChange={(e) => onChange({ ...scene, accentColor: e.target.value })}
+                  />
+                  <input
+                    type="text"
+                    value={scene.accentColor ?? '#C9A24B'}
+                    className={`${inputClass} w-full pl-10`}
+                    onChange={(e) => onChange({ ...scene, accentColor: e.target.value })}
+                  />
+                </div>
+              </Field>
+            </div>
             <Field label="Logo URL (optional)">
               <input
                 type="text"
@@ -134,7 +165,7 @@ export function PropertyPanel({ scene, onChange }: Props) {
               <input
                 type="color"
                 value={scene.textColor ?? '#ffffff'}
-                className={`${inputClass} h-9`}
+                className={`${inputClass} h-9 w-full cursor-pointer p-1`}
                 onChange={(e) => onChange({ ...scene, textColor: e.target.value })}
               />
             </Field>
@@ -172,7 +203,7 @@ export function PropertyPanel({ scene, onChange }: Props) {
               <input
                 type="color"
                 value={scene.accentColor ?? '#C9A24B'}
-                className={`${inputClass} h-9`}
+                className={`${inputClass} h-9 w-full cursor-pointer p-1`}
                 onChange={(e) => onChange({ ...scene, accentColor: e.target.value })}
               />
             </Field>
@@ -209,7 +240,7 @@ export function PropertyPanel({ scene, onChange }: Props) {
               <input
                 type="color"
                 value={scene.accentColor ?? '#C9A24B'}
-                className={`${inputClass} h-9`}
+                className={`${inputClass} h-9 w-full cursor-pointer p-1`}
                 onChange={(e) => onChange({ ...scene, accentColor: e.target.value })}
               />
             </Field>
@@ -231,6 +262,8 @@ function ChatMessageEditor({
   scene: Extract<SceneConfig, { type: 'chat' }>;
   onChange: (s: SceneConfig) => void;
 }) {
+  const color = SCENE_COLORS.chat;
+
   function updateMessage(i: number, patch: Partial<ChatMessage>) {
     const messages = scene.messages.map((m, idx) => (idx === i ? { ...m, ...patch } : m));
     onChange({ ...scene, messages });
@@ -247,58 +280,66 @@ function ChatMessageEditor({
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <Field label="Platform">
-        <select
-          value={scene.platform}
-          className={inputClass}
-          onChange={(e) =>
-            onChange({ ...scene, platform: e.target.value as 'whatsapp' | 'instagram' })
-          }
-        >
-          <option value="whatsapp">WhatsApp</option>
-          <option value="instagram">Instagram</option>
-        </select>
-      </Field>
-      <Field label="Contact Name">
-        <input
-          type="text"
-          value={scene.contactName ?? ''}
-          className={inputClass}
-          onChange={(e) => onChange({ ...scene, contactName: e.target.value })}
-        />
-      </Field>
-
-      <span className="mt-2 text-xs font-medium text-neutral-600">Messages</span>
-      {scene.messages.map((m, i) => (
-        <div key={i} className="flex items-center gap-2">
+    <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Platform">
           <select
-            value={m.sender}
-            className={`${inputClass} w-24`}
-            onChange={(e) => updateMessage(i, { sender: e.target.value as 'them' | 'me' })}
+            value={scene.platform}
+            className={`${inputClass} w-full`}
+            onChange={(e) =>
+              onChange({ ...scene, platform: e.target.value as 'whatsapp' | 'instagram' })
+            }
           >
-            <option value="them">Them</option>
-            <option value="me">Me</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="instagram">Instagram</option>
           </select>
+        </Field>
+        <Field label="Contact Name">
           <input
             type="text"
-            value={m.text}
-            className={`${inputClass} flex-1`}
-            onChange={(e) => updateMessage(i, { text: e.target.value })}
+            value={scene.contactName ?? ''}
+            className={inputClass}
+            onChange={(e) => onChange({ ...scene, contactName: e.target.value })}
           />
-          <button onClick={() => removeMessage(i)} className="text-xs text-red-500">
-            ✕
-          </button>
-        </div>
-      ))}
+        </Field>
+      </div>
+
+      <span className="mt-2 text-xs font-semibold tracking-wider text-neutral-400 uppercase">Messages</span>
+      <div className="flex flex-col gap-2 max-h-60 overflow-y-auto pr-1">
+        {scene.messages.map((m, i) => (
+          <div key={i} className="flex items-center gap-2 bg-neutral-900/40 p-2 rounded-xl border border-neutral-900">
+            <select
+              value={m.sender}
+              className={`${inputClass} py-1 px-1.5 bg-neutral-950 border-neutral-800 text-xs w-20`}
+              onChange={(e) => updateMessage(i, { sender: e.target.value as 'them' | 'me' })}
+            >
+              <option value="them">Them</option>
+              <option value="me">Me</option>
+            </select>
+            <input
+              type="text"
+              value={m.text}
+              className={`${inputClass} flex-1 py-1 text-xs bg-transparent border-none focus:ring-0`}
+              onChange={(e) => updateMessage(i, { text: e.target.value })}
+            />
+            <button
+              onClick={() => removeMessage(i)}
+              className="p-1 text-neutral-500 hover:text-red-400 transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+      </div>
       <button
         onClick={addMessage}
-        className="mt-1 rounded-md border border-dashed border-neutral-300 px-2 py-1 text-xs text-neutral-500 hover:bg-neutral-50"
+        style={{ borderColor: `${color.accent}44`, color: color.accent }}
+        className="mt-1 rounded-xl border border-dashed px-3 py-2 text-xs font-medium bg-neutral-900/20 hover:bg-neutral-900/60 transition-colors"
       >
         + Add message
       </button>
-      <p className="mt-1 text-[10px] text-neutral-400">
-        Duration auto-recalculates based on message count whenever you add or remove one.
+      <p className="text-[10px] text-neutral-500 italic">
+        Duration auto-recalculates based on message threads.
       </p>
     </div>
   );
@@ -311,6 +352,8 @@ function ReviewListEditor({
   scene: Extract<SceneConfig, { type: 'reviewStack' }>;
   onChange: (s: SceneConfig) => void;
 }) {
+  const color = SCENE_COLORS.reviewStack;
+
   function updateReview(i: number, patch: Partial<Review>) {
     const reviews = scene.reviews.map((r, idx) => (idx === i ? { ...r, ...patch } : r));
     onChange({ ...scene, reviews });
@@ -327,7 +370,7 @@ function ReviewListEditor({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       <Field label="Label (shown above the stack)">
         <input
           type="text"
@@ -337,49 +380,55 @@ function ReviewListEditor({
         />
       </Field>
 
-      <span className="mt-2 text-xs font-medium text-neutral-600">Reviews</span>
-      {scene.reviews.map((r, i) => (
-        <div key={i} className="flex flex-col gap-1 rounded-md border border-neutral-200 p-2">
-          <div className="flex items-center gap-2">
-            <select
-              value={r.stars}
-              className={`${inputClass} w-16`}
-              onChange={(e) => updateReview(i, { stars: parseInt(e.target.value, 10) })}
-            >
-              {[5, 4, 3, 2, 1].map((n) => (
-                <option key={n} value={n}>
-                  {n}★
-                </option>
-              ))}
-            </select>
-            <input
-              type="text"
-              value={r.name}
-              placeholder="Customer name"
-              className={`${inputClass} flex-1`}
-              onChange={(e) => updateReview(i, { name: e.target.value })}
+      <span className="mt-2 text-xs font-semibold tracking-wider text-neutral-400 uppercase">Reviews</span>
+      <div className="flex flex-col gap-3 max-h-64 overflow-y-auto pr-1">
+        {scene.reviews.map((r, i) => (
+          <div key={i} className="flex flex-col gap-2 rounded-xl border border-neutral-900 bg-neutral-900/30 p-3">
+            <div className="flex items-center gap-2">
+              <select
+                value={r.stars}
+                className={`${inputClass} py-1 px-1.5 bg-neutral-950 border-neutral-800 text-xs w-16 text-amber-400`}
+                onChange={(e) => updateReview(i, { stars: parseInt(e.target.value, 10) })}
+              >
+                {[5, 4, 3, 2, 1].map((n) => (
+                  <option key={n} value={n}>
+                    {n}★
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                value={r.name}
+                placeholder="Customer name"
+                className={`${inputClass} flex-1 py-1 text-xs bg-neutral-950`}
+                onChange={(e) => updateReview(i, { name: e.target.value })}
+              />
+              <button
+                onClick={() => removeReview(i)}
+                className="p-1 text-neutral-500 hover:text-red-400 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            <textarea
+              value={r.quote}
+              placeholder="Review text"
+              className={`${inputClass} text-xs py-1.5 bg-neutral-950`}
+              rows={2}
+              onChange={(e) => updateReview(i, { quote: e.target.value })}
             />
-            <button onClick={() => removeReview(i)} className="text-xs text-red-500">
-              ✕
-            </button>
           </div>
-          <textarea
-            value={r.quote}
-            placeholder="Review text"
-            className={inputClass}
-            rows={2}
-            onChange={(e) => updateReview(i, { quote: e.target.value })}
-          />
-        </div>
-      ))}
+        ))}
+      </div>
       <button
         onClick={addReview}
-        className="mt-1 rounded-md border border-dashed border-neutral-300 px-2 py-1 text-xs text-neutral-500 hover:bg-neutral-50"
+        style={{ borderColor: `${color.accent}44`, color: color.accent }}
+        className="mt-1 rounded-xl border border-dashed px-3 py-2 text-xs font-medium bg-neutral-900/20 hover:bg-neutral-900/60 transition-colors"
       >
         + Add review
       </button>
-      <p className="mt-1 text-[10px] text-neutral-400">
-        Duration auto-recalculates based on review count whenever you add or remove one.
+      <p className="text-[10px] text-neutral-500 italic">
+        Duration auto-recalculates based on your stack size.
       </p>
     </div>
   );

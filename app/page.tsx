@@ -33,7 +33,7 @@ function PillButton({
   active,
   onClick,
   children,
-  accent = '#7C5CFF',
+  accent = '#a855f7',
 }: {
   active: boolean;
   onClick: () => void;
@@ -43,11 +43,20 @@ function PillButton({
   return (
     <button
       onClick={onClick}
-      className="rounded-full border-2 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wide transition-all"
+      className="rounded-xl border px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 shadow-lg"
       style={
         active
-          ? { backgroundColor: accent, borderColor: accent, color: '#fff' }
-          : { backgroundColor: '#fff', borderColor: '#E4E1F0', color: '#6B6B76' }
+          ? {
+            backgroundColor: accent,
+            borderColor: accent,
+            color: '#fff',
+            boxShadow: `0 0 14px ${accent}44`
+          }
+          : {
+            backgroundColor: '#141419',
+            borderColor: '#27272a',
+            color: '#a1a1aa'
+          }
       }
     >
       {children}
@@ -103,57 +112,66 @@ export default function Home() {
 
   return (
     <main
-      className="flex min-h-screen flex-col items-center gap-6 px-6 py-10 lg:flex-row lg:items-start lg:justify-center"
+      className="flex min-h-screen flex-col items-center gap-8 px-6 py-10 lg:flex-row lg:items-start lg:justify-center transition-colors duration-300"
       style={{
-        background: 'linear-gradient(160deg, #F6F5FC 0%, #FBF7F3 45%, #F2FAF8 100%)',
+        background: 'radial-gradient(circle at top left, #0e0e12 0%, #050507 100%)',
       }}
     >
-      {/* LEFT: preview */}
-      <div className="flex flex-col items-center gap-4">
-        <div className="flex items-center gap-2.5">
+      {/* LEFT COMPONENT: STAGE PREVIEW */}
+      <div className="flex flex-col items-center gap-5 bg-neutral-950/40 p-6 rounded-3xl border border-neutral-900 shadow-2xl backdrop-blur-md">
+        <div className="flex w-full items-center gap-3 border-b border-neutral-900 pb-4">
           <div
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white"
-            style={{ background: 'linear-gradient(135deg, #7C5CFF, #FF6B6B)' }}
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-base font-black text-white shadow-md animate-pulse"
+            style={{ background: 'linear-gradient(135deg, #a855f7, #ec4899)' }}
           >
-            S
+            M
           </div>
           <div>
-            <h1 className={`${heading.className} text-lg font-bold text-neutral-800`}>
-              Scene Studio
+            <h1 className={`${heading.className} text-lg font-bold tracking-wide text-neutral-100`}>
+              brandMotion Studio
             </h1>
-            <p className="text-xs text-neutral-500">{project.brandName}</p>
+            <p className="text-xs font-medium tracking-wider text-neutral-500 uppercase">{project.brandName}</p>
           </div>
         </div>
 
-        <div className="flex gap-2">
-          <PillButton active={demoKey === 'perfume'} onClick={() => switchDemo('perfume')} accent="#D98E3F">
-            Perfume Demo
-          </PillButton>
-          <PillButton active={demoKey === 'chat'} onClick={() => switchDemo('chat')} accent="#3BA7E0">
-            Chat Demo
-          </PillButton>
-          <PillButton active={demoKey === 'review'} onClick={() => switchDemo('review')} accent="#1F8A5F">
-            Review Demo
-          </PillButton>
-        </div>
-
-        <div className="flex gap-2">
-          {(Object.keys(VIEWPORT_LABELS) as Viewport[]).map((vp) => (
-            <PillButton
-              key={vp}
-              active={project.viewport === vp}
-              onClick={() => setProject((p) => ({ ...p, viewport: vp }))}
-              accent="#7C5CFF"
-            >
-              {VIEWPORT_LABELS[vp]}
+        {/* Configuration Controllers */}
+        <div className="flex flex-col gap-3 w-full border-b border-neutral-900 pb-4">
+          <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-600">Select Demo Variant</span>
+          <div className="flex flex-wrap gap-2">
+            <PillButton active={demoKey === 'perfume'} onClick={() => switchDemo('perfume')} accent="#a855f7">
+              Perfume Product
             </PillButton>
-          ))}
+            <PillButton active={demoKey === 'chat'} onClick={() => switchDemo('chat')} accent="#06b6d4">
+              Social Threads
+            </PillButton>
+            <PillButton active={demoKey === 'review'} onClick={() => switchDemo('review')} accent="#ec4899">
+              Customer Stack
+            </PillButton>
+          </div>
         </div>
 
-        <Stage project={project} />
+        <div className="flex flex-col gap-3 w-full pb-2">
+          <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-600">Canvas Dimension Layout</span>
+          <div className="flex flex-wrap gap-2">
+            {(Object.keys(VIEWPORT_LABELS) as Viewport[]).map((vp) => (
+              <PillButton
+                key={vp}
+                active={project.viewport === vp}
+                onClick={() => setProject((p) => ({ ...p, viewport: vp }))}
+                accent="#3b82f6"
+              >
+                {VIEWPORT_LABELS[vp]}
+              </PillButton>
+            ))}
+          </div>
+        </div>
+
+        <div className="pt-2">
+          <Stage project={project} />
+        </div>
       </div>
 
-      {/* RIGHT: editor panels */}
+      {/* RIGHT COMPONENT: INTERACTIVE EDITORS */}
       <div className="flex w-full max-w-sm flex-col gap-4">
         <SceneList
           scenes={project.scenes}
@@ -164,12 +182,15 @@ export default function Home() {
           onDelete={handleDelete}
           onDuplicate={handleDuplicate}
         />
+
         {selectedScene ? (
           <PropertyPanel scene={selectedScene} onChange={handleScenePropertyChange} />
         ) : (
-          <p className="rounded-2xl border-2 border-dashed border-neutral-200 bg-white/60 p-4 text-center text-xs text-neutral-400">
-            Select a scene above to edit its text, colors, and settings.
-          </p>
+          <div className="rounded-2xl border border-dashed border-neutral-800 bg-neutral-950/50 p-6 text-center shadow-inner backdrop-blur-sm">
+            <p className="text-xs text-neutral-500 font-medium tracking-wide">
+              Select an active scene path from your timeline array configuration above to initialize the parameter editor properties.
+            </p>
+          </div>
         )}
       </div>
     </main>

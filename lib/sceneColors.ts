@@ -1,16 +1,30 @@
-import { SceneType } from "@/types/scene";
-
-// Every scene type gets a distinct color identity used consistently across
-// the scene list, badges, and property panel — so you can recognize a
-// scene's type by color alone, without reading the label.
-export const SCENE_COLORS: Record<
-  SceneType,
-  { accent: string; soft: string; text: string }
-> = {
-  brandIntro: { accent: "#D98E3F", soft: "#FBF1E1", text: "#8A5A1D" }, // amber — warmth, identity
-  videoIntro: { accent: "#E1585A", soft: "#FCEAEA", text: "#A3393B" }, // rose — attention/hook
-  productView: { accent: "#2D9C8F", soft: "#E4F5F3", text: "#1F6B62" }, // teal — product/showcase
-  cta: { accent: "#7C5CFF", soft: "#EFEBFF", text: "#5B3FCB" }, // violet — action
-  chat: { accent: "#3BA7E0", soft: "#E7F4FC", text: "#1F6E9C" }, // sky blue — conversation
-  reviewStack: { accent: "#1F8A5F", soft: "#E4F5EC", text: "#146345" }, // emerald — trust/reviews
+export const SCENE_COLOR_PALETTES = {
+  cyberpunk: {
+    background: "#0c0a0f" /* Deep midnight purple */,
+    text: "#ffffff",
+    primary: "#a855f7" /* Neon Purple */,
+    secondary: "#00f5ff" /* High-glow Cyan */,
+    accent: "#ff007f" /* Cyber Pink */,
+  },
+  darkVibrant: {
+    background: "#0d1117" /* Dark slate */,
+    text: "#f0f6fc",
+    primary: "#58a6ff" /* Bright Blue */,
+    secondary: "#7ee787" /* Electric Mint Green */,
+    accent: "#aff5b4",
+  },
 };
+
+// lib/sceneColors.ts
+
+// Make sure SCENE_COLORS is exported and maps your scene types to glowing accents
+export const SCENE_COLORS: Record<string, { accent: string; soft: string; text: string }> = {
+  brandIntro: { accent: '#a855f7', soft: 'rgba(168, 85, 247, 0.1)', text: '#ffffff' },  // Neon Purple
+  videoIntro: { accent: '#06b6d4', soft: 'rgba(6, 182, 212, 0.1)', text: '#ffffff' },  // Electric Cyan
+  productView: { accent: '#ec4899', soft: 'rgba(236, 72, 153, 0.1)', text: '#ffffff' }, // Hot Pink
+  cta: { accent: '#10b981', soft: 'rgba(16, 185, 129, 0.1)', text: '#ffffff' },         // Vibrant Emerald
+  chat: { accent: '#f59e0b', soft: 'rgba(245, 158, 11, 0.1)', text: '#ffffff' },        // Bright Amber
+  reviewStack: { accent: '#3b82f6', soft: 'rgba(59, 130, 246, 0.1)', text: '#ffffff' }, // Intense Blue
+};
+// Update your default export or baseline scene colors to use the cyberpunk preset
+export const DEFAULT_SCENE_BACKGROUND = "#0c0a0f";
